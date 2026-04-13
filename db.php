@@ -1,15 +1,16 @@
 <?php
-// db.php — Railway.app compatible
-// Railway auto-injects these exact env variable names when you add a MySQL plugin
+// db.php — Railway.app Public Network Connection
 error_reporting(0);
 
-$host    = getenv('MYSQLHOST')     ?: 'localhost';
-$port    = getenv('MYSQLPORT')     ?: '3306';
-$db      = getenv('MYSQLDATABASE') ?: 'nammaride_db';
-$user    = getenv('MYSQLUSER')     ?: 'root';
-$pass    = getenv('MYSQLPASSWORD') ?: '';
+// Hardcoded credentials directly from Railway Public Network tab
+$host    = 'metro.proxy.rlwy.net';
+$port    = '19531';
+$db      = 'railway';
+$user    = 'root';
+$pass    = 'nQHMGkffOHiSPWcwjCVaOKsxWevsXusK';
 $charset = 'utf8mb4';
 
+// The DSN string now explicitly includes the custom port
 $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
