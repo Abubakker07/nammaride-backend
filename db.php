@@ -20,11 +20,11 @@ if (getenv('MYSQLHOST')) {
     // 2. ALWAYS DATA ENVIRONMENT (Auto-detected via URL)
     // ---------------------------------------------------------
     // REPLACE THESE WITH YOUR EXACT ALWAYS DATA CREDENTIALS!
-    $host = 'mysql-yourname.alwaysdata.net'; 
+    $host = 'mysql-nammaride-free.alwaysdata.net'; 
     $port = '3306';                          // AlwaysData uses the standard port
-    $db   = 'yourname_default';
-    $user = 'yourname';
-    $pass = 'YourAlwaysDataPassword';      
+    $db   = 'nammaride-free_nammaride_db';
+    $user = 'nammaride-free';
+    $pass = 'Nammaride@alwaysdata';      
 
 } else {
     // ---------------------------------------------------------
