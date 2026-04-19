@@ -1,129 +1,75 @@
-# 🛺 NammaRide: Full-Stack Ride Aggregator Platform
+<div align="center">
 
-![Kotlin](https://img.shields.io/badge/Kotlin-B125EA?style=for-the-badge&logo=kotlin&logoColor=white)
-![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-4285F4?style=for-the-badge&logo=android&logoColor=white)
+# ⚙️ NammaRide Backend API
+### The Core Pricing & Routing Engine
+
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
+![AlwaysData](https://img.shields.io/badge/AlwaysData-FF0055?style=for-the-badge&logo=linux&logoColor=white)
 ![Railway](https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)
 
----
+This repository contains the custom **PHP/MySQL REST API** that powers the [NammaRide Android Application](https://github.com/Abubakker07/NammaRide-Android). It handles multi-environment database connections, dynamic Bangalore route generation, and an algorithm-driven dynamic pricing engine.
 
-**NammaRide** is a native Android ride-hailing simulator built to tackle real-world transit challenges in major metropolitan areas like Bangalore.
+[Features](#-core-backend-features) • [API Endpoints](#-rest-api-endpoints) • [Architecture](#️-database--deployment-architecture) • [Local Setup](#-local-development)
 
-Developed as a comprehensive full-stack platform, it features a custom **PHP/MySQL REST API** deployed on Railway, an **O(n log n) QuickSort** dynamic pricing engine, and integrated **Google ML Kit Vision AI** for on-device fraud prevention.
-
----
-
-## 🚀 Key Features
-
-### 🔐 AI Smart QR Fare Guard
-Uses Google ML Kit (Vision API) to scan a driver's UPI QR code directly on the device. It parses payment data and cross-verifies it with backend fare data to prevent overcharging.
-
-### ⚡ Dynamic Surge Pricing & Sorting
-Implements:
-- Time-based surge pricing (e.g., **1.25x during peak hours**)  
-- **5% aggregator GST**  
-- Backend **O(n log n) QuickSort algorithm** for fast fare comparison  
-
-### 📍 Intelligent Geofencing
-Restricts vehicle types based on routes:
-- No autos/bikes for airport routes  
-- Smart backend validation  
-
-### 🗺️ OSRM Map Integration
-- Uses **OSRM (Open Source Routing Machine)**  
-- Draws real-time routes  
-- Calculates:
-  - Distance (km)
-  - ETA (minutes)
-
-### 🚨 Hardware-Linked Emergency SOS
-- Uses Android accelerometer  
-- Detects abnormal shaking  
-- Automatically:
-  - Sends SMS to emergency contact  
-  - Calls **112** in critical cases  
-
----
-
-## 📸 App Gallery
-
-> 📌 Replace the image links with actual screenshots from your repository
-
-<div align="center">
-  <img src="screenshots/screen1.jpg" width="18%" />
-  <img src="screenshots/screen2.jpg" width="18%" />
-  <img src="screenshots/screen3.jpg" width="18%" />
-  <img src="screenshots/screen4.jpg" width="18%" />
-  <img src="screenshots/admin_panel.jpg" width="18%" />
 </div>
 
 ---
 
-## 🛠️ System Architecture & Tech Stack
+## 🚀 Core Backend Features
 
-### 📱 Frontend (Android)
-- **Language:** Kotlin  
-- **UI Toolkit:** Jetpack Compose  
-- **Architecture:** MVVM  
-- **Networking:** Retrofit2 + Gson  
-- **Maps:** Osmdroid + OSRM API  
-- **ML:** Google ML Kit (Barcode Scanning)
+### 🧠 O(n log n) QuickSort Pricing Algorithm
+Fares aren't just pulled from a database; they are computed dynamically. The backend factors in base distance, 5% aggregator GST, and time-aware surge multipliers (e.g., peak traffic hours), and then utilizes a custom **QuickSort** implementation to instantly rank available vehicles by price before sending the JSON response.
 
-### 🌐 Backend (REST API)
-- **Language:** PHP 8.x  
-- **Database:** MySQL  
-- **Deployment:** Railway (TCP Proxy)  
-- **DB Tool:** TablePlus  
-- **Admin Panel:** HTML + JavaScript  
+### 🌍 Multi-Environment "God Mode" Configuration
+The `db.php` file is engineered for high availability and seamless developer operations. It automatically detects the active host environment and dynamically applies the correct database credentials for:
+1.  **Railway.app** (via internal environment variables)
+2.  **AlwaysData** (via URL detection)
+3.  **Localhost** (Fallback for XAMPP/MAMP testing)
+
+### 🛡️ Secure Driver Fetching & Validation
+Endpoints are designed to fetch driver and vehicle details while supporting the frontend's Google ML Kit Vision API, allowing the client to cross-verify live backend fare data against physical QR codes to prevent overcharging.
 
 ---
 
-## ⚙️ How It Works (Data Flow)
+## 📡 REST API Endpoints
 
-1. **Request**  
-   Android app sends location data via Retrofit API.
+The API serves clean, structured JSON arrays to the Android client.
 
-2. **Compute**  
-   Backend:
-   - Calculates distance  
-   - Applies surge pricing  
-   - Adds GST  
-   - Validates route rules  
-
-3. **Sort**  
-   QuickSort algorithm ranks ride options by price.
-
-4. **Response**  
-   Returns structured JSON.
-
-5. **Render**  
-   Jetpack Compose updates UI with:
-   - Route polyline  
-   - Fare breakdown  
+| Endpoint | Method | Description |
+| :--- | :---: | :--- |
+| `/get_routes.php` | `GET` | Returns available localized routes, geocoordinates, and destination names. |
+| `/get_fares.php` | `GET` | Accepts a `route_id` parameter and returns computed, sorted vehicle options, dynamic surge metrics, and UI breakdown data. |
+| `/auth.php` | `POST` | Handles user authentication data payloads from the mobile client. |
 
 ---
 
-## 💻 Local Development Setup
+## 🏗️ Database & Deployment Architecture
 
-### 1️⃣ Clone Repository
+* **Language:** PHP 8.x (Raw, dependency-free processing for maximum speed)
+* **Database:** MySQL
+* **Package Management:** Composer (`composer.json` configured explicitly for `ext-pdo_mysql` cloud installations)
+* **Production Host:** AlwaysData / Railway.app
+
+### Database Schema (Overview)
+The relational database utilizes 4 primary tables:
+1.  `routes`: Stores Bangalore destinations, geolocations, and base distances.
+2.  `vehicles`: Defines vehicle types (Auto, Mini Cab, SUV, etc.) and base rate multipliers.
+3.  `drivers`: Links simulated drivers to specific vehicle categories and ratings.
+4.  `users`: Manages authenticated application users.
+
+---
+
+## 💻 Local Development
+
+To run this backend locally on your machine:
+
+### 1. Requirements
+* A local server environment like **XAMPP**, **WAMP**, or **MAMP**.
+* MySQL/MariaDB running on port `3306`.
+
+### 2. Setup Instructions
 ```bash
-git clone https://github.com/YourUsername/NammaRide.git
-cd NammaRide
-2️⃣ Database Setup
-Import nammaride_backup.sql into MySQL (XAMPP/MAMP)
-Update credentials in:
-backend/db.php
-3️⃣ Android Setup
-Open project in Android Studio
-Navigate to:
-com.example.nammaride.network.NammaApi.kt
-Update:
-BASE_URL = "http://192.168.1.X/"
-4️⃣ Run App
-Connect emulator or physical device
-Build & Run 🚀
-📌 Notes
-Ensure backend server is running before launching app
-Replace API URL with Railway deployment for production
-Use real device for best GPS + ML performance
+# Clone this repository into your XAMPP htdocs folder
+git clone [https://github.com/Abubakker07/nammaride-backend.git](https://github.com/Abubakker07/nammaride-backend.git)
+cd nammaride-backend
